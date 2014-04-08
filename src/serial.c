@@ -90,8 +90,8 @@ struct box_t {
     { BOXCALIB, "CALIB;", 17 },
     { BOXGOV, "GOVERNOR;", 18 },
     { BOXOSD, "OSD SW;", 19 },
-    { BOXACRORATE, "ACRO RATE;", 20 },
     { BOXTELEMETRY, "TELEMETRY;", 20 },
+    { BOXACRORATE, "ACRO RATE;", 21 },
     { CHECKBOXITEMS, NULL, 0xFF }
 };
 
