@@ -20,8 +20,11 @@ TARGET		?= NAZE
 # Compile-time options
 OPTIONS		?=
 
-# Debugger optons, must be empty or GDB
+# Debugger options, must be empty or GDB
 DEBUG ?=
+
+# Build with newlib if set TRUE
+NEWLIB ?=
 
 # Serial port/Device for flashing
 SERIAL_DEVICE	?= /dev/ttyUSB0
@@ -132,13 +135,13 @@ STDPERIPH_SRC	 = $(notdir $(wildcard $(STDPERIPH_DIR)/src/*.c))
 #
 
 # Tool names
-CC		 = arm-none-eabi-gcc
-OBJCOPY		 = arm-none-eabi-objcopy
+CC			= arm-none-eabi-gcc
+OBJCOPY		= arm-none-eabi-objcopy
 
 #
 # Tool options.
 #
-INCLUDE_DIRS	 = $(SRC_DIR) \
+INCLUDE_DIRS	= $(SRC_DIR) \
 		   $(STDPERIPH_DIR)/inc \
 		   $(CMSIS_DIR)/CM3/CoreSupport \
 		   $(CMSIS_DIR)/CM3/DeviceSupport/ST/STM32F10x \
@@ -147,6 +150,7 @@ ARCH_FLAGS	 = -mthumb -mcpu=cortex-m3
 BASE_CFLAGS	 = $(ARCH_FLAGS) \
 		   $(addprefix -D,$(OPTIONS)) \
 		   $(addprefix -I,$(INCLUDE_DIRS)) \
+		   -Os \
 		   -Wall \
 		   -ffunction-sections \
 		   -fdata-sections \
@@ -178,12 +182,9 @@ $(error Target '$(TARGET)' is not valid, must be one of $(VALID_TARGETS))
 endif
 
 ifeq ($(DEBUG),GDB)
-CFLAGS = $(BASE_CFLAGS) \
-	-ggdb \
-	-O0
+	CFLAGS = $(BASE_CFLAGS) -ggdb 
 else
-CFLAGS = $(BASE_CFLAGS) \
-	-Os
+	CFLAGS = $(BASE_CFLAGS)
 endif
 
 
