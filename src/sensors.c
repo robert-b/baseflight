@@ -1,5 +1,6 @@
 #include "board.h"
 #include "mw.h"
+#include "fir_filter.h"
 
 uint16_t calibratingA = 0;      // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
 uint16_t calibratingB = 0;      // baro calibration = get new ground pressure value
@@ -179,13 +180,15 @@ static void ACC_Common(void)
         // Calculate average, shift Z down by acc_1G and store values in EEPROM at end of calibration
         if (calibratingA == 1) {
             mcfg.accZero[ROLL] = (a[ROLL] + (CALIBRATING_ACC_CYCLES / 2)) / CALIBRATING_ACC_CYCLES;
-            mcfg.accZero[PITCH] = (a[PITCH] + (CALIBRATING_ACC_CYCLES / 2))  / CALIBRATING_ACC_CYCLES;
-            mcfg.accZero[YAW] = (a[YAW] + (CALIBRATING_ACC_CYCLES / 2))  / CALIBRATING_ACC_CYCLES - acc_1G;
+            mcfg.accZero[PITCH] = (a[PITCH] + (CALIBRATING_ACC_CYCLES / 2)) / CALIBRATING_ACC_CYCLES;
+            mcfg.accZero[YAW] = (a[YAW] + (CALIBRATING_ACC_CYCLES / 2)) / CALIBRATING_ACC_CYCLES - acc_1G;
             cfg.angleTrim[ROLL] = 0;
             cfg.angleTrim[PITCH] = 0;
             writeEEPROM(1, true);      // write accZero in EEPROM
         }
         calibratingA--;
+    } else {
+        accFilterStep(accADC);		// filter acc
     }
 
     if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
@@ -263,7 +266,6 @@ void Baro_Common(void)
     baroPressureSum -= baroHistTab[indexplus1];
     baroHistIdx = indexplus1;
 }
-
 
 int Baro_update(void)
 {
@@ -363,6 +365,8 @@ static void GYRO_Common(void)
             }
         }
         calibratingG--;
+    } else {
+        gyroFilterStep(gyroADC);	// filter gyro
     }
     for (axis = 0; axis < 3; axis++)
         gyroADC[axis] -= gyroZero[axis];
