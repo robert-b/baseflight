@@ -10,6 +10,8 @@
 #define CAP_DYNBALANCE              ((uint32_t)1 << 2)
 #define CAP_FLAPS                   ((uint32_t)1 << 3)
 
+#define MSP_PRIVATE              1      //in+out message      to be used for a generic framework : MSP + function code (LIST/GET/SET) + data. no code yet
+
 #define MSP_IDENT                100    //out message         multitype + multiwii version + protocol version + capability variable
 #define MSP_STATUS               101    //out message         cycletime & errors_count & sensor present & box activation & current setting number
 #define MSP_RAW_IMU              102    //out message         9 DOF
@@ -625,6 +627,15 @@ static void evaluateCommand(void)
                serialize8(GPS_svinfo_quality[i]);
                serialize8(GPS_svinfo_cno[i]);
             }
+        break;
+    case MSP_PRIVATE:
+        if (indRX >=0 && indRX < INBUF_SIZE ){
+            uint8_t mspprivateHeader;
+            mspprivateHeader = read8();            // TODO packet desc , create packed desc specs
+            headSerialReply(mspprivateHeader);
+        }else{
+            headSerialError(0);
+        }
         break;
     default:                   // we do not know how to handle the (valid) message, indicate error MSP $M!
         headSerialError(0);
