@@ -188,7 +188,7 @@ static void ACC_Common(void)
         }
         calibratingA--;
     } else {
-        accFilterStep(accADC);		// filter acc
+        accFirFilter(accADC);		// filter acc
     }
 
     if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
@@ -366,7 +366,7 @@ static void GYRO_Common(void)
         }
         calibratingG--;
     } else {
-        gyroFilterStep(gyroADC);	// filter gyro
+        gyroFirFilter(gyroADC);	// filter gyro
     }
     for (axis = 0; axis < 3; axis++)
         gyroADC[axis] -= gyroZero[axis];
