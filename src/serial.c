@@ -4,7 +4,8 @@
 #include "cli.h"
 #include "telemetry_common.h"
 
-// Multiwii Serial Protocol 0
+// Multiwii Serial Protocol
+#define MSP_PRIVATE_VERSION      0
 #define MSP_VERSION              0
 #define CAP_PLATFORM_32BIT          ((uint32_t)1 << 31)
 #define CAP_DYNBALANCE              ((uint32_t)1 << 2)
@@ -12,10 +13,9 @@
 
 #define MSP_PRIVATE              1      //in+out message      to be used for a generic framework : MSP + function code (LIST/GET/SET) + data. no code yet
 
-#define MSP_PRIVATE_VERSION      0
-#define MSP_PRIVATE_INFO         0      //out message         get the msp_private_version (uint8) and the value count (uint8)
-#define MSP_PRIVATE_GET          1      //out message         get the value (uint8)
-#define MSP_PRIVATE_SET          2      //in message          set the value (uint8)
+#define MSP_PRIVATE_GET          0      //out message         get the value (uint8)
+#define MSP_PRIVATE_SET          1      //in message          set the value (uint8)
+#define MSP_PRIVATE_INFO         255    //out message         get the msp_private_version (uint8) and the value count (uint8)
 
 #define MSP_IDENT                100    //out message         multitype + multiwii version + protocol version + capability variable
 #define MSP_STATUS               101    //out message         cycletime & errors_count & sensor present & box activation & current setting number
