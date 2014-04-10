@@ -5,8 +5,6 @@
  *      Author: nanoage.co.uk
  */
 #include <errno.h>
-#include <sys/stat.h>
-#include <sys/times.h>
 #include <sys/unistd.h>
 #include "stm32f10x_usart.h"
 
