@@ -53,7 +53,7 @@ COMMON_SRC	 = startup_stm32f10x_md_gcc.S \
 		   buzzer.c \
 		   cli.c \
 		   config.c \
-		   fir_filter.c \
+		   filter_fir.c \
 		   gps.c \
 		   imu.c \
 		   main.c \

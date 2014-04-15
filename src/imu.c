@@ -1,5 +1,6 @@
 #include "board.h"
 #include "mw.h"
+#include "filter_fir.h"
 
 int16_t gyroADC[3], accADC[3], accSmooth[3], magADC[3];
 int32_t accSum[3];
@@ -44,10 +45,14 @@ void computeIMU(void)
 {
     uint32_t axis;
     static int16_t gyroYawSmooth = 0;
+    static firvect_t accFIR;
+    static firvect_t gyroFIR;
 
     Gyro_getADC();
+    firFilter(gyroADC, &gyroFIR);    // filter gyro
     if (sensors(SENSOR_ACC)) {
         ACC_getADC();
+        firFilter(accADC, &accFIR);      // filter acc
         getEstimatedAttitude();
     } else {
         accADC[X] = 0;
@@ -250,6 +255,7 @@ static void getEstimatedAttitude(void)
     deltaT = currentT - previousT;
     scale = deltaT * gyro.scale;
     previousT = currentT;
+
 
     // Initialization
     for (axis = 0; axis < 3; axis++) {

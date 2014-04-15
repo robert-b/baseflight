@@ -65,7 +65,7 @@ uint8_t GPS_svinfo_cno[16];        // Carrier to Noise Ratio (Signal Strength)
 
 // Automatic ACC Offset Calibration
 uint16_t InflightcalibratingA = 0;
-int16_t AccInflightCalibrationArmed;
+uint16_t AccInflightCalibrationArmed;
 uint16_t AccInflightCalibrationMeasurementDone = 0;
 uint16_t AccInflightCalibrationSavetoEEProm = 0;
 uint16_t AccInflightCalibrationActive = 0;

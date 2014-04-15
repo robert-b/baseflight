@@ -1,6 +1,6 @@
 #include "board.h"
 #include "mw.h"
-#include "fir_filter.h"
+#include "filter_fir.h"
 
 uint16_t calibratingA = 0;      // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
 uint16_t calibratingB = 0;      // baro calibration = get new ground pressure value
@@ -9,7 +9,7 @@ uint16_t acc_1G = 256;          // this is the 1G measured acceleration.
 int16_t heading, magHold;
 
 extern uint16_t InflightcalibratingA;
-extern int16_t AccInflightCalibrationArmed;
+extern uint16_t AccInflightCalibrationArmed;
 extern uint16_t AccInflightCalibrationMeasurementDone;
 extern uint16_t AccInflightCalibrationSavetoEEProm;
 extern uint16_t AccInflightCalibrationActive;
@@ -187,8 +187,6 @@ static void ACC_Common(void)
             writeEEPROM(1, true);      // write accZero in EEPROM
         }
         calibratingA--;
-    } else {
-        accFirFilter(accADC);		// filter acc
     }
 
     if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
@@ -365,9 +363,8 @@ static void GYRO_Common(void)
             }
         }
         calibratingG--;
-    } else {
-        gyroFirFilter(gyroADC);	// filter gyro
     }
+
     for (axis = 0; axis < 3; axis++)
         gyroADC[axis] -= gyroZero[axis];
 }
