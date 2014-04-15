@@ -2,6 +2,7 @@
 #include "mw.h"
 #include "filter_fir.h"
 
+firvect_t accFIR, gyroFIR;
 int16_t gyroADC[3], accADC[3], accSmooth[3], magADC[3];
 int32_t accSum[3];
 uint32_t accTimeSum = 0;        // keep track for integration of acc
@@ -33,6 +34,15 @@ static void getEstimatedAttitude(void);
 
 void imuInit(void)
 {
+
+    FIR_FILTER_INIT(accFIR.x, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P)
+    FIR_FILTER_INIT(accFIR.y, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P)
+    FIR_FILTER_INIT(accFIR.z, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P)
+
+    FIR_FILTER_INIT(gyroFIR.x, FIR_GYRO_Q, FIR_GYRO_R, FIR_GYRO_P)
+    FIR_FILTER_INIT(gyroFIR.y, FIR_GYRO_Q, FIR_GYRO_R, FIR_GYRO_P)
+    FIR_FILTER_INIT(gyroFIR.z, FIR_GYRO_Q, FIR_GYRO_R, FIR_GYRO_P)
+
     accVelScale = 9.80665f / acc_1G / 10000.0f;
     throttleAngleScale = (1800.0f / M_PI) * (900.0f / cfg.throttle_correction_angle);
 
@@ -47,14 +57,13 @@ void computeIMU(void)
 {
     uint32_t axis;
     static int16_t gyroYawSmooth = 0;
-    static firvect_t accFIR;
-    static firvect_t gyroFIR;
+
 
     Gyro_getADC();
-    firFilter(gyroADC, &gyroFIR);    // filter gyro
+    firFilter(gyroADC, &gyroFIR);       // filter gyro
     if (sensors(SENSOR_ACC)) {
         ACC_getADC();
-        firFilter(accADC, &accFIR);      // filter acc
+        firFilter(accADC, &accFIR);     // filter acc
         getEstimatedAttitude();
     } else {
         accADC[X] = 0;
@@ -258,7 +267,6 @@ static void getEstimatedAttitude(void)
     scale = deltaT * gyro.scale;
     previousT = currentT;
 
-
     // Initialization
     for (axis = 0; axis < 3; axis++) {
         deltaGyroAngle[axis] = gyroADC[axis] * scale;
@@ -289,6 +297,8 @@ static void getEstimatedAttitude(void)
             for (axis = 0; axis < 3; axis++) {
                 EstG.A[axis] = (EstG.A[axis] * (float)mcfg.gyro_cmpf_factor + accN.A[axis]) * INV_GYR_CMPF_FACTOR;
             }
+        }else{
+            return; // zero gravity
         }
     }
 

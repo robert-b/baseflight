@@ -10,36 +10,25 @@
 #include "stdint.h"
 #include "filter_fir.h"
 
-// accFilterStep configuration
-#define FIR_ACC_Q       1.0f    // process noise covariance
-#define FIR_ACC_R       0.06f       // measurement noise covariance
-#define FIR_ACC_P       0.22f      // estimation error covariance
-
-// gyroFilterStep configuration
-#define FIR_GYRO_Q      1.0f       // process noise covariance
-#define FIR_GYRO_R      0.06f    // measurement noise covariance
-#define FIR_GYRO_P      0.22f      // estimation error covariance
-
-#define FILTER_INIT(S, s1, s2, s3, s4) ((firstate_t*)S)->q=s1; ((firstate_t*)S)->r=s2; ((firstate_t*)S)->e=s3; ((firstate_t*)S)->x=s4;
+#define FILTER_INIT_VALUE(S, DATA) ((firstate_t*)(&S->x))->value = DATA[0]; ((firstate_t*)(&S->y))->value = DATA[1];((firstate_t*)(&S->z))->value = DATA[2];S->start = 1;
 
 int16_t firFilterUpdate(firstate_t* state, int16_t measurement)
 {
     float k; // kalman gain
 
     // prediction update
-    state->e = state->e + state->q;
+    state->p = state->p + state->q;
 
     // measurement update
-    k = state->e / (state->e + state->r);
-    state->x = state->x + k * (measurement - state->x);
-    state->e = (1 - k) * state->e;
+    k = state->p / (state->p + state->r);
+    state->value = state->value + k * (measurement - state->value);
+    state->p = (1 - k) * state->p;
 
-    return lrintf(state->x);
+    return lrintf(state->value);
 }
 
 void firFilter(int16_t data[3], firvect_t* stat)
 {
-
     if (stat->start) {
         data[0] = firFilterUpdate(&stat->x, data[0]);
         data[1] = firFilterUpdate(&stat->y, data[1]);
@@ -47,10 +36,6 @@ void firFilter(int16_t data[3], firvect_t* stat)
         return;
     }
 
-    stat->start = 1;
-    FILTER_INIT(&stat->x, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[0])
-    FILTER_INIT(&stat->y, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[1])
-    FILTER_INIT(&stat->z, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[2])
-
+    FILTER_INIT_VALUE(stat, data)
 }
 

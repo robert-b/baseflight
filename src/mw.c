@@ -57,7 +57,6 @@ uint16_t GPS_ground_course = 0;     // degrees * 10
 int16_t nav[2];
 int16_t nav_rated[2];               // Adding a rate controller to the navigation to make it smoother
 int8_t nav_mode = NAV_MODE_NONE;    // Navigation mode
-
 uint8_t GPS_numCh;                  // Number of channels
 uint8_t GPS_svinfo_chn[16];         // Channel number
 uint8_t GPS_svinfo_svid[16];        // Satellite ID
@@ -817,7 +816,7 @@ void loop(void)
                     break;
                 }
             case 4:
-                taskOrder=0;
+                taskOrder = 0;
 //#ifdef SONAR
 //                if (sensors(SENSOR_SONAR)) {
 //                    Sonar_update();

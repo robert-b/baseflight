@@ -8,11 +8,26 @@
 #ifndef FIR_FILTER_H_
 #define FIR_FILTER_H_
 
+#define FIR_FILTER_INIT(S, s1, s2, s3) S.q=s1; S.r=s2; S.p=s3;
+
+
+// accFilterStep configuration
+#define FIR_ACC_Q       1.0f        // process noise covariance
+#define FIR_ACC_R       0.06f       // measurement noise covariance
+#define FIR_ACC_P       0.22f       // estimation error covariance
+
+// gyroFilterStep configuration
+#define FIR_GYRO_Q      1.0f        // process noise covariance
+#define FIR_GYRO_R      0.06f       // measurement noise covariance
+#define FIR_GYRO_P      0.22f       // estimation error covariance
+
+
+
 typedef struct {
     float q;    // process noise covariance
     float r;    // measurement noise covariance
-    float e;    // estimation error covariance
-    float x;    // value
+    float p;    // estimation error covariance
+    float value;    // value
 } firstate_t;
 
 typedef struct {
