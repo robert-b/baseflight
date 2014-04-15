@@ -1,5 +1,5 @@
 /*
- * fir_filter.c
+ * filter_fir.c
  *
  *  Created on: 25.11.2012
  *      Author & Copyright: bubi-007
@@ -11,7 +11,7 @@
 #include "filter_fir.h"
 
 // accFilterStep configuration
-#define FIR_ACC_Q       0.0625f    // process noise covariance
+#define FIR_ACC_Q       1.0f    // process noise covariance
 #define FIR_ACC_R       0.06f       // measurement noise covariance
 #define FIR_ACC_P       0.22f      // estimation error covariance
 
@@ -20,9 +20,7 @@
 #define FIR_GYRO_R      0.06f    // measurement noise covariance
 #define FIR_GYRO_P      0.22f      // estimation error covariance
 
-
 #define FILTER_INIT(S, s1, s2, s3, s4) ((firstate_t*)S)->q=s1; ((firstate_t*)S)->r=s2; ((firstate_t*)S)->e=s3; ((firstate_t*)S)->x=s4;
-
 
 int16_t firFilterUpdate(firstate_t* state, int16_t measurement)
 {
@@ -39,18 +37,20 @@ int16_t firFilterUpdate(firstate_t* state, int16_t measurement)
     return lrintf(state->x);
 }
 
-void firFilter(int16_t data[3], firvect_t* firvect)
+void firFilter(int16_t data[3], firvect_t* stat)
 {
 
-    if (!firvect->state) {
-        firvect->state = 1;
-        FILTER_INIT(&firvect->x, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[0])
-        FILTER_INIT(&firvect->y, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[1])
-        FILTER_INIT(&firvect->z, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[2])
-    } else {
-        data[0] = firFilterUpdate(&firvect->x, data[0]);
-        data[1] = firFilterUpdate(&firvect->y, data[1]);
-        data[2] = firFilterUpdate(&firvect->z, data[2]);
+    if (stat->start) {
+        data[0] = firFilterUpdate(&stat->x, data[0]);
+        data[1] = firFilterUpdate(&stat->y, data[1]);
+        data[2] = firFilterUpdate(&stat->z, data[2]);
+        return;
     }
+
+    stat->start = 1;
+    FILTER_INIT(&stat->x, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[0])
+    FILTER_INIT(&stat->y, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[1])
+    FILTER_INIT(&stat->z, FIR_ACC_Q, FIR_ACC_R, FIR_ACC_P, data[2])
+
 }
 

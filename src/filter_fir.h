@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     firstate_t x,y,z;   // axes
-    int state;      // filter state
+    int start;          // filter state
 } firvect_t;
 
 

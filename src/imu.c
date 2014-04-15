@@ -19,6 +19,7 @@ int32_t vario = 0;                      // variometer in cm/s
 int16_t throttleAngleCorrection = 0;    // correction of throttle in lateral wind,
 float magneticDeclination = 0.0f;       // calculated at startup from config
 float accVelScale;
+float throttleAngleScale;
 
 // **************
 // gyro+acc IMU
@@ -33,6 +34,7 @@ static void getEstimatedAttitude(void);
 void imuInit(void)
 {
     accVelScale = 9.80665f / acc_1G / 10000.0f;
+    throttleAngleScale = (1800.0f / M_PI) * (900.0f / cfg.throttle_correction_angle);
 
 #ifdef MAG
     // if mag sensor is enabled, use it
@@ -323,9 +325,19 @@ static void getEstimatedAttitude(void)
 
     acc_calc(deltaT); // rotate acc vector into earth frame
 
-    if (cfg.throttle_angle_correction) {
-        int cosZ = ((int32_t)(EstG.V.Z * 100.0f)) / acc_1G;
-        throttleAngleCorrection = cfg.throttle_angle_correction * constrain(100 - cosZ, 0, 100) / 8;
+    if (cfg.throttle_correction_value) {
+
+        float cosZ = EstG.V.Z / sqrtf(EstG.V.X * EstG.V.X + EstG.V.Y * EstG.V.Y + EstG.V.Z * EstG.V.Z);
+
+        if (cosZ <= 0.015f) { // we are inverted, vertical or with a small angle < 0.86 deg
+            throttleAngleCorrection = 0;
+        } else {
+            int angle = lrintf(acosf(cosZ) * throttleAngleScale);
+            if (angle > 900)
+                angle = 900;
+            throttleAngleCorrection = lrintf(cfg.throttle_correction_value * sinf(angle / 900.0f * M_PI / 2.0f)) ;
+        }
+
     }
 }
 

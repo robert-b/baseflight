@@ -57,11 +57,12 @@ uint16_t GPS_ground_course = 0;     // degrees * 10
 int16_t nav[2];
 int16_t nav_rated[2];               // Adding a rate controller to the navigation to make it smoother
 int8_t nav_mode = NAV_MODE_NONE;    // Navigation mode
-uint8_t GPS_numCh;                 // Number of channels
-uint8_t GPS_svinfo_chn[16];        // Channel number
-uint8_t GPS_svinfo_svid[16];       // Satellite ID
-uint8_t GPS_svinfo_quality[16];    // Bitfield Qualtity
-uint8_t GPS_svinfo_cno[16];        // Carrier to Noise Ratio (Signal Strength)
+
+uint8_t GPS_numCh;                  // Number of channels
+uint8_t GPS_svinfo_chn[16];         // Channel number
+uint8_t GPS_svinfo_svid[16];        // Satellite ID
+uint8_t GPS_svinfo_quality[16];     // Bitfield Qualtity
+uint8_t GPS_svinfo_cno[16];         // Carrier to Noise Ratio (Signal Strength)
 
 // Automatic ACC Offset Calibration
 uint16_t InflightcalibratingA = 0;
@@ -901,7 +902,7 @@ void loop(void)
         }
 #endif
 
-        if (cfg.throttle_angle_correction && (f.ANGLE_MODE || f.HORIZON_MODE)) {
+        if (cfg.throttle_correction_value && (f.ANGLE_MODE || f.HORIZON_MODE)) {
             rcCommand[THROTTLE] += throttleAngleCorrection;
         }
 
