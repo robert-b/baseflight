@@ -7,6 +7,7 @@ int16_t gyroADC[3], accADC[3], accSmooth[3], magADC[3];
 int32_t accSum[3];
 uint32_t accTimeSum = 0;        // keep track for integration of acc
 int accSumCount = 0;
+float smallAngle = 0;
 int32_t baroPressure = 0;
 int32_t baroTemperature = 0;
 uint32_t baroPressureSum = 0;
@@ -45,6 +46,7 @@ void imuInit(void)
 
     accVelScale = 9.80665f / acc_1G / 10000.0f;
     throttleAngleScale = (1800.0f / M_PI) * (900.0f / cfg.throttle_correction_angle);
+    smallAngle = cosf(M_PI / 8.0f);
 
 #ifdef MAG
     // if mag sensor is enabled, use it
@@ -57,7 +59,6 @@ void computeIMU(void)
 {
     uint32_t axis;
     static int16_t gyroYawSmooth = 0;
-
 
     Gyro_getADC();
     firFilter(gyroADC, &gyroFIR);       // filter gyro
@@ -297,30 +298,22 @@ static void getEstimatedAttitude(void)
             for (axis = 0; axis < 3; axis++) {
                 EstG.A[axis] = (EstG.A[axis] * (float)mcfg.gyro_cmpf_factor + accN.A[axis]) * INV_GYR_CMPF_FACTOR;
             }
-        }else{
-            return; // zero gravity
+            // re-normalise the vector
+            normalizeV(&EstG.V, &EstG.V);
         }
     }
 
-    // re-normalise the vector
-    normalizeV(&EstG.V, &EstG.V);
-
     if (sensors(SENSOR_MAG)) {
-        // work with a normalised vector to reduce mathematical problems
         t_fp_vector magN = { .A = { magADC[0], magADC[1], magADC[2] } };
         if (normalizeV(&magN.V, &magN.V)) {
             for (axis = 0; axis < 3; axis++) {
                 EstM.A[axis] = (EstM.A[axis] * (float)mcfg.gyro_cmpfm_factor + magN.A[axis]) * INV_GYR_CMPFM_FACTOR; // EstM.A[axis] = (EstM.A[axis] * GYR_CMPFM_FACTOR + magADCfloat[axis]) * INV_GYR_CMPFM_FACTOR;
             }
-            // re-normalise the vector
             normalizeV(&EstM.V, &EstM.V);
         }
     }
 
-    if (EstG.A[Z] > 0.866f) // normalized vector is less than sin pi/3
-        f.SMALL_ANGLES_25 = 1;
-    else
-        f.SMALL_ANGLES_25 = 0;
+    f.SMALL_ANGLES = (EstG.A[Z] > smallAngle);
 
     // Attitude of the estimated vector
     anglerad[ROLL] = atan2f(EstG.V.Y, EstG.V.Z);
@@ -336,19 +329,16 @@ static void getEstimatedAttitude(void)
     acc_calc(deltaT); // rotate acc vector into earth frame
 
     if (cfg.throttle_correction_value) {
-
-        float cosZ = EstG.V.Z / sqrtf(EstG.V.X * EstG.V.X + EstG.V.Y * EstG.V.Y + EstG.V.Z * EstG.V.Z);
-
-        if (cosZ <= 0.015f) { // we are inverted, vertical or with a small angle < 0.86 deg
+        if (EstG.V.Z <= 0.015f) { // we are inverted, vertical or with a small angle < 0.86 deg
             throttleAngleCorrection = 0;
         } else {
-            int angle = lrintf(acosf(cosZ) * throttleAngleScale);
+            int angle = lrintf(acosf(EstG.V.Z) * throttleAngleScale);
             if (angle > 900)
                 angle = 900;
-            throttleAngleCorrection = lrintf(cfg.throttle_correction_value * sinf(angle / 900.0f * M_PI / 2.0f)) ;
+            throttleAngleCorrection = lrintf(cfg.throttle_correction_value * sinf(angle / (900.0f * M_PI / 2.0f))) ;
         }
-
     }
+
 }
 
 #ifdef BARO
