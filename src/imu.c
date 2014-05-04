@@ -218,21 +218,23 @@ void accSum_reset(void)
 // baseflight calculation by Luggi09 originates from arducopter
 static int16_t calculateHeading(t_fp_vector *vec)
 {
-    int16_t head;
-
-    float cosineRoll = cosf(anglerad[ROLL]);
-    float sineRoll = sinf(anglerad[ROLL]);
-    float cosinePitch = cosf(anglerad[PITCH]);
-    float sinePitch = sinf(anglerad[PITCH]);
-    float Xh = vec->A[X] * cosinePitch + vec->A[Y] * sineRoll * sinePitch + vec->A[Z] * sinePitch * cosineRoll;
-    float Yh = vec->A[Y] * cosineRoll - vec->A[Z] * sineRoll;
-    float hd = (atan2f(Yh, Xh) * 1800.0f / M_PI + magneticDeclination) / 10.0f;
-    head = lrintf(hd);
-    if (head < 0)
-        head += 360;
-
-    return head;
-    return heading;
+    if (cfg.hil) {
+        return heading;
+    } else {
+        int16_t head;
+        float cosineRoll = cosf(anglerad[ROLL]);
+        float sineRoll = sinf(anglerad[ROLL]);
+        float cosinePitch = cosf(anglerad[PITCH]);
+        float sinePitch = sinf(anglerad[PITCH]);
+        float Xh = vec->A[X] * cosinePitch + vec->A[Y] * sineRoll * sinePitch + vec->A[Z] * sinePitch * cosineRoll;
+        float Yh = vec->A[Y] * cosineRoll - vec->A[Z] * sineRoll;
+        float hd = (atan2f(Yh, Xh) * 1800.0f / M_PI + magneticDeclination) / 10.0f;
+        head = lrintf(hd);
+        if (head < 0)
+            head += 360;
+    
+        return head;
+    }
 }
 
 static void getEstimatedAttitude(void)
@@ -298,7 +300,6 @@ static void getEstimatedAttitude(void)
             heading = calculateHeading(&EstN);
 
         acc_calc(deltaT); // rotate acc vector into earth frame
-
     }
     if (cfg.throttle_correction_value) {
 
@@ -310,7 +311,7 @@ static void getEstimatedAttitude(void)
             int angle = lrintf(acosf(cosZ) * throttleAngleScale);
             if (angle > 900)
                 angle = 900;
-            throttleAngleCorrection = lrintf(cfg.throttle_correction_value * sinf(angle / (900.0f * M_PI / 2.0f)));
+            throttleAngleCorrection = lrintf(cfg.throttle_correction_value * sinf(angle / (900.0f * M_PI / 2.0f))) ;
         }
 
     }
@@ -318,6 +319,7 @@ static void getEstimatedAttitude(void)
 
 #ifdef BARO
 #define UPDATE_INTERVAL 25000   // 40hz update rate (20hz LPF on acc)
+
 int getEstimatedAltitude(void)
 {
     static uint32_t previousT;
@@ -371,16 +373,9 @@ int getEstimatedAltitude(void)
         accAlt = accAlt * cfg.baro_cf_alt + (float)BaroAlt * (1.0f - cfg.baro_cf_alt);      // complementary filter for Altitude estimation (baro & acc)
         EstAlt = accAlt;
         vel += vel_acc;
-
-#if 0
-        debug[0] = accSum[2] / accSumCount; // acceleration
-        debug[1] = vel;// velocity
-        debug[2] = accAlt;// height
-#endif
-
-        accSum_reset();
+    } else {
+        BaroAlt = EstAlt;
     }
-    BaroAlt = EstAlt;
     baroVel = (BaroAlt - lastBaroAlt) * 1000000.0f / dTime;
     lastBaroAlt = BaroAlt;
 
@@ -413,6 +408,15 @@ int getEstimatedAltitude(void)
     // D
     BaroPID -= constrain(cfg.D8[PIDVEL] * (accZ_tmp + accZ_old) / 64, -150, 150);
     accZ_old = accZ_tmp;
+
+    #if 0
+    debug[0] = accSum[2] / accSumCount; // acceleration
+    debug[1] = vel;                     // velocity
+    debug[2] = accAlt;                  // height
+    debug[3] = BaroAlt;
+    #endif
+    
+    accSum_reset();
 
     return 1;
 }

@@ -118,7 +118,7 @@ void hottV4GPSUpdate(void)
         HoTTV4GPSModule.longitudeSecHigh = sec >> 8;
 
         // GPS Speed in km/h
-        uint16_t speed = (GPS_speed / 100) * 36; // 0.1m/s * 0.36 = km/h
+        uint16_t speed = ((int32_t)GPS_speed * 36) / 1000; // 0.01m/s * 3.6 = km/h
         HoTTV4GPSModule.GPSSpeedLow = speed & 0x00FF;
         HoTTV4GPSModule.GPSSpeedHigh = speed >> 8;
 

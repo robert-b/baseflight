@@ -384,6 +384,9 @@ void mixTable(void)
         // prevent "yaw jump" during yaw correction
         axisPID[YAW] = constrain(axisPID[YAW], -100 - abs(rcCommand[YAW]), +100 + abs(rcCommand[YAW]));
     }
+    
+    if((rcData[THROTTLE] < mcfg.mincheck) && (mcfg.disable_set_minthrottle) && (abs(vario) < 20))
+        axisPID[YAW] = 0;        
 
     // motors for non-servo mixes
     if (numberMotor > 1)
@@ -418,12 +421,12 @@ void mixTable(void)
             motor[0] = servo[7];
             if (f.PASSTHRU_MODE) {
                 // do not use sensors for correction, simple 2 channel mixing
-                servo[3] = (servoDirection(3, 1) * rcCommand[PITCH]) + (servoDirection(3, 2) * rcCommand[ROLL]);
-                servo[4] = (servoDirection(4, 1) * rcCommand[PITCH]) + (servoDirection(4, 2) * rcCommand[ROLL]);
+                servo[3] = (servoDirection(3, 1) * rcCommand[PITCH]) * cfg.fixedwing_pitchrate + (servoDirection(3, 2) * rcCommand[ROLL]) * cfg.fixedwing_rollrate;
+                servo[4] = (servoDirection(4, 1) * rcCommand[PITCH]) * cfg.fixedwing_pitchrate + (servoDirection(4, 2) * rcCommand[ROLL]) * cfg.fixedwing_rollrate;
             } else {
                 // use sensors to correct (gyro only or gyro + acc)
-                servo[3] = (servoDirection(3, 1) * axisPID[PITCH]) + (servoDirection(3, 2) * axisPID[ROLL]);
-                servo[4] = (servoDirection(4, 1) * axisPID[PITCH]) + (servoDirection(4, 2) * axisPID[ROLL]);
+                servo[3] = (servoDirection(3, 1) * axisPID[PITCH]) * cfg.fixedwing_pitchrate + (servoDirection(3, 2) * axisPID[ROLL]) * cfg.fixedwing_rollrate;
+                servo[4] = (servoDirection(4, 1) * axisPID[PITCH]) * cfg.fixedwing_pitchrate + (servoDirection(4, 2) * axisPID[ROLL]) * cfg.fixedwing_rollrate;
             }
             servo[3] += servoMiddle(3);
             servo[4] += servoMiddle(4);
@@ -495,10 +498,13 @@ void mixTable(void)
         } else {
             motor[i] = constrain(motor[i], mcfg.minthrottle, mcfg.maxthrottle);
             if ((rcData[THROTTLE]) < mcfg.mincheck) {
-                if (!feature(FEATURE_MOTOR_STOP))
+                if (!mcfg.disable_set_minthrottle)
                     motor[i] = mcfg.minthrottle;
-                else
+                else if(feature(FEATURE_MOTOR_STOP))
                     motor[i] = mcfg.mincommand;
+                    f.MOTORS_STOPPED = 1;
+            } else {
+                f.MOTORS_STOPPED = 0;
             }
         }
         if (!f.ARMED) {
