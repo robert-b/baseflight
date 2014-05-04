@@ -399,7 +399,7 @@ static void gpsNewData(uint16_t c)
     int32_t dir;
     int16_t speed;
 
-    if (gpsNewFrame(c)) {
+    if (gpsNewFrame(c) || cfg.hil) {
         // new data received and parsed, we're in business
         gpsData.lastLastMessage = gpsData.lastMessage;
         gpsData.lastMessage = millis();
