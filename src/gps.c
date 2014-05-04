@@ -159,6 +159,10 @@ void gpsInitHardware(void)
 
 void gpsThread(void)
 {
+    if (cfg.hil){
+        gpsNewData(' ');
+        return;
+    }
     // read out available GPS bytes
     if (core.gpsport) {
         while (serialTotalBytesWaiting(core.gpsport))
@@ -188,7 +192,7 @@ void gpsThread(void)
 
         case GPS_RECEIVINGDATA:
             // check for no data/gps timeout/cable disconnection etc
-            if (millis() - gpsData.lastMessage > GPS_TIMEOUT) {
+            if (millis() - gpsData.lastMessage > GPS_TIMEOUT && !cfg.hil) {
                 // remove GPS from capability
                 sensorsClear(SENSOR_GPS);
                 gpsSetState(GPS_LOSTCOMMS);
@@ -399,7 +403,7 @@ static void gpsNewData(uint16_t c)
     int32_t dir;
     int16_t speed;
 
-    if (gpsNewFrame(c)) {
+    if (gpsNewFrame(c) || cfg.hil) {
         // new data received and parsed, we're in business
         gpsData.lastLastMessage = gpsData.lastMessage;
         gpsData.lastMessage = millis();
