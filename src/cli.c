@@ -223,6 +223,7 @@ const clivalue_t valueTable[] = {
     { "p_vel", VAR_UINT8, &cfg.P8[PIDVEL], 0, 200 },
     { "i_vel", VAR_UINT8, &cfg.I8[PIDVEL], 0, 200 },
     { "d_vel", VAR_UINT8, &cfg.D8[PIDVEL], 0, 200 },
+    { "hil", VAR_UINT8, &cfg.hil, 0, 1 },
 };
 
 #define VALUE_COUNT (sizeof(valueTable) / sizeof(clivalue_t))

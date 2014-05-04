@@ -10,6 +10,8 @@
 #define CAP_DYNBALANCE              ((uint32_t)1 << 2)
 #define CAP_FLAPS                   ((uint32_t)1 << 3)
 
+#define MSP_SET_ATTITUDE                  10    // in message  roll , pitch , magHead ( trueHead )
+
 #define MSP_IDENT                100    //out message         multitype + multiwii version + protocol version + capability variable
 #define MSP_STATUS               101    //out message         cycletime & errors_count & sensor present & box activation & current setting number
 #define MSP_RAW_IMU              102    //out message         9 DOF
@@ -282,6 +284,13 @@ static void evaluateCommand(void)
     int32_t lat = 0, lon = 0, alt = 0;
 
     switch (cmdMSP) {
+   	case MSP_SET_ATTITUDE:
+       for (i = 0; i < 2; i++)
+           angle[i] = read16();
+       heading = read16();
+       EstAlt = read32();
+       headSerialReply(0);
+       break;
     case MSP_SET_RAW_RC:
         for (i = 0; i < 8; i++)
             rcData[i] = read16();

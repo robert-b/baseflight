@@ -213,6 +213,7 @@ typedef struct config_t {
     uint16_t nav_speed_min;                 // cm/sec
     uint16_t nav_speed_max;                 // cm/sec
     uint16_t ap_mode;                       // Temporarily Disables GPS_HOLD_MODE to be able to make it possible to adjust the Hold-position when moving the sticks, creating a deadspan for GPS
+    bool hil;                               // hardware in the loop simulation
 } config_t;
 
 // System-wide
