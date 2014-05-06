@@ -218,7 +218,6 @@ void accSum_reset(void)
 // baseflight calculation by Luggi09 originates from arducopter
 static int16_t calculateHeading(t_fp_vector *vec)
 {
-    if (cfg.hil) {
         int16_t head;
         float cosineRoll = cosf(anglerad[ROLL]);
         float sineRoll = sinf(anglerad[ROLL]);
@@ -231,9 +230,6 @@ static int16_t calculateHeading(t_fp_vector *vec)
         if (head < 0)
             head += 360;
         return head;
-    } else {
-        return heading;
-    }
 }
 
 static void getEstimatedAttitude(void)
