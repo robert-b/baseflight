@@ -202,18 +202,20 @@ void annexCode(void)
         }
     }
     /************************************************/
-    // For OSD  !!  Show values Based on GPS
-    if(!sensors(SENSOR_BARO) && sensors(SENSOR_GPS))
-        EstAlt = (GPS_altitude - GPS_home[ALT]) * 100;
-    
-    if(!sensors(SENSOR_MAG) && sensors(SENSOR_GPS) && GPS_speed > 150) {
-        heading = GPS_ground_course / 10;
+    if (!cfg.hil){
+        // For OSD  !!  Show values Based on GPS
+        if(!sensors(SENSOR_BARO) && sensors(SENSOR_GPS))
+            EstAlt = (GPS_altitude - GPS_home[ALT]) * 100;
 
-        // Wrap GPS_ground_course 180 for Gui & OSD
-        if (heading <= -180)
-            heading += 360;
-        if (heading >=  180)
-            heading -= 360;
+        if(!sensors(SENSOR_MAG) && sensors(SENSOR_GPS) && GPS_speed > 150) {
+            heading = GPS_ground_course / 10;
+    
+            // Wrap GPS_ground_course 180 for Gui & OSD
+            if (heading <= -180)
+                heading += 360;
+            if (heading >=  180)
+                heading -= 360;
+        }
     }
     /************************************************/
 
