@@ -229,6 +229,7 @@ static int16_t calculateHeading(t_fp_vector *vec)
         head = lrintf(hd);
         if (head < 0)
             head += 360;   
+        return head;
 }
 
 static void getEstimatedAttitude(void)
@@ -382,24 +383,30 @@ int getEstimatedAltitude(void)
 
     // set vario
     vario = applyDeadband(vel_tmp, 5);
+    
+    if (abs(angle[ROLL]) < 800 && abs(angle[PITCH]) < 800) { // only calculate pid if the copters thrust is facing downwards(<80deg)
+        // Altitude P-Controller
+        error = constrain(AltHold - EstAlt, -500, 500);
+        error = applyDeadband(error, 10);       // remove small P parametr to reduce noise near zero position
+        setVel = constrain((cfg.P8[PIDALT] * error / 128), -300, +300); // limit velocity to +/- 3 m/s
 
-    // Altitude P-Controller
-    error = constrain(AltHold - EstAlt, -500, 500);
-    error = applyDeadband(error, 10);       // remove small P parametr to reduce noise near zero position
-    setVel = constrain((cfg.P8[PIDALT] * error / 128), -300, +300); // limit velocity to +/- 3 m/s
+        // Velocity PID-Controller
+        // P
+        error = setVel - vel_tmp;
+        BaroPID = constrain((cfg.P8[PIDVEL] * error / 32), -300, +300);
 
-    // Velocity PID-Controller
-    // P
-    error = setVel - vel_tmp;
-    BaroPID = constrain((cfg.P8[PIDVEL] * error / 32), -300, +300);
+        // I
+        errorAltitudeI += (cfg.I8[PIDVEL] * error) / 8;
+        errorAltitudeI = constrain(errorAltitudeI, -(1024 * 200), (1024 * 200));
+        BaroPID += errorAltitudeI / 1024;     // I in range +/-200
 
-    // I
-    errorAltitudeI += (cfg.I8[PIDVEL] * error) / 8;
-    errorAltitudeI = constrain(errorAltitudeI, -(1024 * 200), (1024 * 200));
-    BaroPID += errorAltitudeI / 1024;     // I in range +/-200
-
-    // D
-    BaroPID -= constrain(cfg.D8[PIDVEL] * (accZ_tmp + accZ_old) / 64, -150, 150);
+        // D
+        BaroPID -= constrain(cfg.D8[PIDVEL] * (accZ_tmp + accZ_old) / 64, -150, 150);
+        
+    } else {
+        BaroPID = 0;
+    }
+    
     accZ_old = accZ_tmp;
 
     #if 0
