@@ -22,13 +22,14 @@ uint8_t accHardware = ACC_DEFAULT;  // which accel chip is used/detected
 
 #ifdef FY90Q
 // FY90Q analog gyro/acc
-void sensorsAutodetect(void)
+bool sensorsAutodetect(void)
 {
     adcSensorInit(&acc, &gyro);
+    return true;
 }
 #else
 // AfroFlight32 i2c sensors
-void sensorsAutodetect(void)
+bool sensorsAutodetect(void)
 {
     int16_t deg, min;
     drv_adxl345_config_t acc_params;
@@ -43,7 +44,7 @@ void sensorsAutodetect(void)
         ;
     } else if (!mpu3050Detect(&gyro, mcfg.gyro_lpf)) {
         // if this fails, we get a beep + blink pattern. we're doomed, no gyro or i2c error.
-        failureMode(3);
+        return false;
     }
 
     // Accelerometer. Fuck it. Let user break shit.
@@ -127,6 +128,8 @@ retry:
         magneticDeclination = (deg + ((float)min * (1.0f / 60.0f))) * 10; // heading is in 0.1deg units
     else
         magneticDeclination = 0.0f;
+
+    return true;
 }
 #endif
 
@@ -151,7 +154,7 @@ void batteryInit(void)
     voltage = batteryAdcToVoltage((uint16_t)(voltage / 32));
 
     // autodetect cell count, going from 2S..6S
-    for (i = 2; i < 6; i++) {
+    for (i = 1; i < 6; i++) {
         if (voltage < i * mcfg.vbatmaxcellvoltage)
             break;
     }

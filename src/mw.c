@@ -226,13 +226,7 @@ void annexCode(void)
 
 uint16_t pwmReadRawRC(uint8_t chan)
 {
-    uint16_t data;
-
-    data = pwmRead(mcfg.rcmap[chan]);
-    if (data < 750 || data > 2250)
-        data = mcfg.midrc;
-
-    return data;
+    return pwmRead(mcfg.rcmap[chan]);
 }
 
 void computeRC(void)
@@ -860,7 +854,7 @@ void loop(void)
                                 AltHold = EstAlt;
                                 isAltHoldChanged = 0;
                             }
-                            rcCommand[THROTTLE] = initialThrottleHold + BaroPID;
+                            rcCommand[THROTTLE] = constrain(initialThrottleHold + BaroPID, mcfg.minthrottle + 100, mcfg.maxthrottle);
                         }
                     } else {
                         // slow alt changes for apfags
@@ -875,8 +869,7 @@ void loop(void)
                             AltHoldCorr = 0;
                             isAltHoldChanged = 0;
                         }
-                        rcCommand[THROTTLE] = initialThrottleHold + BaroPID;
-                        rcCommand[THROTTLE] = constrain(rcCommand[THROTTLE], mcfg.minthrottle + 150, mcfg.maxthrottle);
+                        rcCommand[THROTTLE] = constrain(initialThrottleHold + BaroPID, mcfg.minthrottle + 100, mcfg.maxthrottle);
                     }
                 } else {
                     // handle fixedwing-related althold. UNTESTED! and probably wrong
