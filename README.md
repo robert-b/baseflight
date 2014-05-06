@@ -1,4 +1,4 @@
-baseflight
+baseflight HIL
 ==========
 
 32 bit fork of the MultiWii RC flight controller firmware
