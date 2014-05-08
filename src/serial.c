@@ -238,12 +238,14 @@ reset:
 void serialInit(uint32_t baudrate)
 {
     int idx;
-
+    USART_TypeDef* serial = USART1;
+    
     // Open msp UART
-    if (mcfg.msp_port == SERIALPORT_UART_2)
-        core.mainport = uartOpen(USART2, NULL, baudrate, MODE_RXTX);
-    else
-        core.mainport = uartOpen(USART1, NULL, baudrate, MODE_RXTX);
+    if (mcfg.msp_port == SERIALPORT_UART_2 && !feature(FEATURE_SERIALRX)) {
+        serial = USART2;
+    }
+    core.mainport = uartOpen(serial, NULL, baudrate, MODE_RXTX);
+    serialPortMap[mcfg.msp_port] = serialPortMap[mcfg.msp_port] + 1;
 
     // calculate used boxes based on features and fill availableBoxes[] array
     memset(availableBoxes, 0xFF, sizeof(availableBoxes));
