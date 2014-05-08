@@ -49,15 +49,15 @@ void computeIMU(void)
     uint32_t axis;
     static int16_t gyroYawSmooth = 0;
 
-    Gyro_getADC();
-    if (sensors(SENSOR_ACC)) {
-        ACC_getADC();
-        getEstimatedAttitude();
-    } else {
-        accADC[X] = 0;
-        accADC[Y] = 0;
-        accADC[Z] = 0;
-    }
+//    Gyro_getADC();
+//    if (sensors(SENSOR_ACC)) {
+//        ACC_getADC();
+//        getEstimatedAttitude();
+//    } else {
+//        accADC[X] = 0;
+//        accADC[Y] = 0;
+//        accADC[Z] = 0;
+//    }
 
     if (mcfg.mixerConfiguration == MULTITYPE_TRI) {
         gyroData[YAW] = (gyroYawSmooth * 2 + gyroADC[YAW]) / 3;

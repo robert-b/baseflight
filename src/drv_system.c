@@ -120,9 +120,9 @@ void systemInit(bool overclock)
 
     // Configure the rest of the stuff
 #ifndef FY90Q
-    i2cInit(I2C2);
+   // i2cInit(I2C2);
 #endif
-    spiInit();
+//    spiInit();
 
     // sleep for 100ms
     delay(100);

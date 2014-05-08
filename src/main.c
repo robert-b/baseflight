@@ -55,7 +55,7 @@ int main(void)
         mcfg.power_adc_channel = 0;
     }
 
-    adcInit(&adc_params);
+  //  adcInit(&adc_params);
     // Check battery type/voltage
     if (feature(FEATURE_VBAT))
         batteryInit();
@@ -72,7 +72,7 @@ int main(void)
 #endif
 
     // if gyro was not detected due to whatever reason, we give up now.
-    if (!sensorsOK)
+    if (!sensorsOK && !cfg.hil)
         failureMode(3);
 
     LED1_ON;
@@ -125,7 +125,7 @@ int main(void)
             break;
     }
 
-    pwmInit(&pwm_params);
+    //pwmInit(&pwm_params);
 
     // configure PWM/CPPM read function and max number of channels. spektrum or sbus below will override both of these, if enabled
     for (i = 0; i < RC_CHANS; i++)
@@ -135,16 +135,16 @@ int main(void)
 
     if (feature(FEATURE_SERIALRX)) {
         switch (mcfg.serialrx_type) {
-            case SERIALRX_SPEKTRUM1024:
-            case SERIALRX_SPEKTRUM2048:
-                spektrumInit(&rcReadRawFunc);
-                break;
-            case SERIALRX_SBUS:
-                sbusInit(&rcReadRawFunc);
-                break;
-            case SERIALRX_SUMD:
-                sumdInit(&rcReadRawFunc);
-                break;
+//            case SERIALRX_SPEKTRUM1024:
+//            case SERIALRX_SPEKTRUM2048:
+//                spektrumInit(&rcReadRawFunc);
+//                break;
+////            case SERIALRX_SBUS:
+//                sbusInit(&rcReadRawFunc);
+//                break;
+//            case SERIALRX_SUMD:
+//                sumdInit(&rcReadRawFunc);
+//                break;
             case SERIALRX_MSP:
                 mspInit(&rcReadRawFunc);
                 break;
@@ -180,8 +180,8 @@ int main(void)
         //core.mainport = (serialPort_t*)&(softSerialPorts[SERIALPORT_SOFT_1]); // Uncomment to switch the main port to use softserial.
     }
 
-    if (feature(FEATURE_TELEMETRY))
-        initTelemetry();
+//    if (feature(FEATURE_TELEMETRY))
+//        initTelemetry();
 
     previousTime = micros();
     if (mcfg.mixerConfiguration == MULTITYPE_GIMBAL)

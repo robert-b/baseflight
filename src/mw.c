@@ -158,16 +158,16 @@ void annexCode(void)
     }
 
     if (feature(FEATURE_VBAT)) {
-        if (!(++vbatTimer % VBATFREQ)) {
-            vbatRawArray[(ind++) % 8] = adcGetChannel(ADC_BATTERY);
-            for (i = 0; i < 8; i++)
-                vbatRaw += vbatRawArray[i];
-            vbat = batteryAdcToVoltage(vbatRaw / 8);
-        }
-        if ((vbat > batteryWarningVoltage) || (vbat < mcfg.vbatmincellvoltage)) { // VBAT ok, buzzer off
-            buzzerFreq = 0;
-        } else
-            buzzerFreq = 4;     // low battery
+//        if (!(++vbatTimer % VBATFREQ)) {
+//            vbatRawArray[(ind++) % 8] = adcGetChannel(ADC_BATTERY);
+//            for (i = 0; i < 8; i++)
+//                vbatRaw += vbatRawArray[i];
+//            vbat = batteryAdcToVoltage(vbatRaw / 8);
+//        }
+//        if ((vbat > batteryWarningVoltage) || (vbat < mcfg.vbatmincellvoltage)) { // VBAT ok, buzzer off
+//            buzzerFreq = 0;
+//        } else
+//            buzzerFreq = 4;     // low battery
     }
 
     buzzer(buzzerFreq);         // external buzzer routine that handles buzzer events globally now
@@ -180,7 +180,7 @@ void annexCode(void)
         if (f.ARMED)
             LED0_ON;
 
-        checkTelemetryState();
+//        checkTelemetryState();
     }
 
 #ifdef LEDRING
@@ -188,7 +188,7 @@ void annexCode(void)
         static uint32_t LEDTime;
         if ((int32_t)(currentTime - LEDTime) >= 0) {
             LEDTime = currentTime + 50000;
-            ledringState();
+           // ledringState();
         }
     }
 #endif
@@ -205,9 +205,9 @@ void annexCode(void)
 
     serialCom();
 
-    if (!cliMode && feature(FEATURE_TELEMETRY)) {
-        handleTelemetry();
-    }
+//    if (!cliMode && feature(FEATURE_TELEMETRY)) {
+//        handleTelemetry();
+//    }
 
     if (sensors(SENSOR_GPS)) {
         static uint32_t GPSLEDTime;
@@ -227,7 +227,8 @@ void annexCode(void)
 
 uint16_t pwmReadRawRC(uint8_t chan)
 {
-    return pwmRead(mcfg.rcmap[chan]);
+//    return pwmRead(mcfg.rcmap[chan]);
+    return 1500;
 }
 
 void computeRC(void)
@@ -260,7 +261,7 @@ void computeRC(void)
 
 static void mwArm(void)
 {
-    if (calibratingG == 0 && f.ACC_CALIBRATED) {
+    if ((calibratingG == 0 && f.ACC_CALIBRATED) || cfg.hil) {
         // TODO: feature(FEATURE_FAILSAFE) && failsafeCnt < 2
         // TODO: && ( !feature || ( feature && ( failsafecnt > 2) )
         if (!f.ARMED) {         // arm now!
@@ -446,16 +447,16 @@ void loop(void)
     // calculate rc stuff from serial-based receivers (spek/sbus)
     if (feature(FEATURE_SERIALRX)) {
         switch (mcfg.serialrx_type) {
-            case SERIALRX_SPEKTRUM1024:
-            case SERIALRX_SPEKTRUM2048:
-                rcReady = spektrumFrameComplete();
-                break;
-            case SERIALRX_SBUS:
-                rcReady = sbusFrameComplete();
-                break;
-            case SERIALRX_SUMD:
-                rcReady = sumdFrameComplete();
-                break;
+//            case SERIALRX_SPEKTRUM1024:
+//            case SERIALRX_SPEKTRUM2048:
+//                rcReady = spektrumFrameComplete();
+//                break;
+//            case SERIALRX_SBUS:
+//                rcReady = sbusFrameComplete();
+//                break;
+//            case SERIALRX_SUMD:
+//                rcReady = sumdFrameComplete();
+//                break;
             case SERIALRX_MSP:
                 rcReady = mspFrameComplete();
                 break;

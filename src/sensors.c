@@ -31,103 +31,100 @@ bool sensorsAutodetect(void)
 // AfroFlight32 i2c sensors
 bool sensorsAutodetect(void)
 {
-    int16_t deg, min;
-    drv_adxl345_config_t acc_params;
-    bool haveMpu6k = false;
-
+//
     // Autodetect gyro hardware. We have MPU3050 or MPU6050.
-    if (mpu6050Detect(&acc, &gyro, mcfg.gyro_lpf, &core.mpu6050_scale)) {
-        // this filled up  acc.* struct with init values
-        haveMpu6k = true;
-    } else if (l3g4200dDetect(&gyro, mcfg.gyro_lpf)) {
-        // well, we found our gyro
-        ;
-    } else if (!mpu3050Detect(&gyro, mcfg.gyro_lpf)) {
-        // if this fails, we get a beep + blink pattern. we're doomed, no gyro or i2c error.
-        return false;
-    }
+//    if (mpu6050Detect(&acc, &gyro, mcfg.gyro_lpf, &core.mpu6050_scale)) {
+//        // this filled up  acc.* struct with init values
+//        haveMpu6k = true;
+//    } else if (l3g4200dDetect(&gyro, mcfg.gyro_lpf)) {
+//        // well, we found our gyro
+//        ;
+//    } else if (!mpu3050Detect(&gyro, mcfg.gyro_lpf)) {
+//        // if this fails, we get a beep + blink pattern. we're doomed, no gyro or i2c error.
+//        return false;
+//    }
 
     // Accelerometer. Fuck it. Let user break shit.
-retry:
-    switch (mcfg.acc_hardware) {
-        case ACC_NONE: // disable ACC
-            sensorsClear(SENSOR_ACC);
-            break;
-        case ACC_DEFAULT: // autodetect
-        case ACC_ADXL345: // ADXL345
-            acc_params.useFifo = false;
-            acc_params.dataRate = 800; // unused currently
-            if (adxl345Detect(&acc_params, &acc))
-                accHardware = ACC_ADXL345;
-            if (mcfg.acc_hardware == ACC_ADXL345)
-                break;
-            ; // fallthrough
-        case ACC_MPU6050: // MPU6050
-            if (haveMpu6k) {
-                mpu6050Detect(&acc, &gyro, mcfg.gyro_lpf, &core.mpu6050_scale); // yes, i'm rerunning it again.  re-fill acc struct
-                accHardware = ACC_MPU6050;
-                if (mcfg.acc_hardware == ACC_MPU6050)
-                    break;
-            }
-            ; // fallthrough
-#ifndef OLIMEXINO
-        case ACC_MMA8452: // MMA8452
-            if (mma8452Detect(&acc)) {
-                accHardware = ACC_MMA8452;
-                if (mcfg.acc_hardware == ACC_MMA8452)
-                    break;
-            }
-            ; // fallthrough
-        case ACC_BMA280: // BMA280
-            if (bma280Detect(&acc)) {
-                accHardware = ACC_BMA280;
-                if (mcfg.acc_hardware == ACC_BMA280)
-                    break;
-            }
-#endif
-    }
-
-    // Found anything? Check if user fucked up or ACC is really missing.
-    if (accHardware == ACC_DEFAULT) {
-        if (mcfg.acc_hardware > ACC_DEFAULT) {
-            // Nothing was found and we have a forced sensor type. Stupid user probably chose a sensor that isn't present.
-            mcfg.acc_hardware = ACC_DEFAULT;
-            goto retry;
-        } else {
-            // We're really screwed
-            sensorsClear(SENSOR_ACC);
-        }
-    }
-
-#ifdef BARO
-    // Detect what pressure sensors are available. baro->update() is set to sensor-specific update function
-    if (!ms5611Detect(&baro)) {
-        // ms5611 disables BMP085, and tries to initialize + check PROM crc. if this works, we have a baro
-        if (!bmp085Detect(&baro)) {
-            // if both failed, we don't have anything
-            sensorsClear(SENSOR_BARO);
-        }
-    }
-#endif
-
-    // Now time to init things, acc first
-    if (sensors(SENSOR_ACC))
-        acc.init(mcfg.acc_align);
-    // this is safe because either mpu6050 or mpu3050 or lg3d20 sets it, and in case of fail, we never get here.
-    gyro.init(mcfg.gyro_align);
-
-#ifdef MAG
-    if (!hmc5883lDetect(mcfg.mag_align))
-        sensorsClear(SENSOR_MAG);
-#endif
-
-    // calculate magnetic declination
-    deg = cfg.mag_declination / 100;
-    min = cfg.mag_declination % 100;
-    if (sensors(SENSOR_MAG))
-        magneticDeclination = (deg + ((float)min * (1.0f / 60.0f))) * 10; // heading is in 0.1deg units
-    else
-        magneticDeclination = 0.0f;
+//retry:
+//    switch (mcfg.acc_hardware) {
+//        case ACC_NONE: // disable ACC
+//            sensorsClear(SENSOR_ACC);
+//            break;
+//        case ACC_DEFAULT: // autodetect
+//        case ACC_ADXL345: // ADXL345
+//            acc_params.useFifo = false;
+//            acc_params.dataRate = 800; // unused currently
+//            if (adxl345Detect(&acc_params, &acc))
+//                accHardware = ACC_ADXL345;
+//            if (mcfg.acc_hardware == ACC_ADXL345)
+//                break;
+//            ; // fallthrough
+//        case ACC_MPU6050: // MPU6050
+//            if (haveMpu6k) {
+//                mpu6050Detect(&acc, &gyro, mcfg.gyro_lpf, &core.mpu6050_scale); // yes, i'm rerunning it again.  re-fill acc struct
+//                accHardware = ACC_MPU6050;
+//                if (mcfg.acc_hardware == ACC_MPU6050)
+//                    break;
+//            }
+//            ; // fallthrough
+//#ifndef OLIMEXINO
+//        case ACC_MMA8452: // MMA8452
+//            if (mma8452Detect(&acc)) {
+//                accHardware = ACC_MMA8452;
+//                if (mcfg.acc_hardware == ACC_MMA8452)
+//                    break;
+//            }
+//            ; // fallthrough
+//        case ACC_BMA280: // BMA280
+//            if (bma280Detect(&acc)) {
+//                accHardware = ACC_BMA280;
+//                if (mcfg.acc_hardware == ACC_BMA280)
+//                    break;
+//            }
+//#endif
+//    }
+//
+//    // Found anything? Check if user fucked up or ACC is really missing.
+//    if (accHardware == ACC_DEFAULT) {
+//        if (mcfg.acc_hardware > ACC_DEFAULT) {
+//            // Nothing was found and we have a forced sensor type. Stupid user probably chose a sensor that isn't present.
+//            mcfg.acc_hardware = ACC_DEFAULT;
+//            goto retry;
+//        } else {
+//            // We're really screwed
+//            sensorsClear(SENSOR_ACC);
+//        }
+//    }
+//
+//#ifdef BARO
+//    // Detect what pressure sensors are available. baro->update() is set to sensor-specific update function
+//    if (!ms5611Detect(&baro)) {
+//        // ms5611 disables BMP085, and tries to initialize + check PROM crc. if this works, we have a baro
+//        if (!bmp085Detect(&baro)) {
+//            // if both failed, we don't have anything
+//            sensorsClear(SENSOR_BARO);
+//        }
+//    }
+//#endif
+//
+//    // Now time to init things, acc first
+//    if (sensors(SENSOR_ACC))
+//        acc.init(mcfg.acc_align);
+//    // this is safe because either mpu6050 or mpu3050 or lg3d20 sets it, and in case of fail, we never get here.
+//    gyro.init(mcfg.gyro_align);
+//
+//#ifdef MAG
+//    if (!hmc5883lDetect(mcfg.mag_align))
+//        sensorsClear(SENSOR_MAG);
+//#endif
+//
+//    // calculate magnetic declination
+//    deg = cfg.mag_declination / 100;
+//    min = cfg.mag_declination % 100;
+//    if (sensors(SENSOR_MAG))
+//        magneticDeclination = (deg + ((float)min * (1.0f / 60.0f))) * 10; // heading is in 0.1deg units
+//    else
+//        magneticDeclination = 0.0f;
 
     return true;
 }
@@ -145,19 +142,19 @@ void batteryInit(void)
     uint32_t i;
     uint32_t voltage = 0;
 
-    // average up some voltage readings
-    for (i = 0; i < 32; i++) {
-        voltage += adcGetChannel(ADC_BATTERY);
-        delay(10);
-    }
-
-    voltage = batteryAdcToVoltage((uint16_t)(voltage / 32));
-
-    // autodetect cell count, going from 2S..6S
-    for (i = 1; i < 6; i++) {
-        if (voltage < i * mcfg.vbatmaxcellvoltage)
-            break;
-    }
+//    // average up some voltage readings
+//    for (i = 0; i < 32; i++) {
+//        voltage += adcGetChannel(ADC_BATTERY);
+//        delay(10);
+//    }
+//
+//    voltage = batteryAdcToVoltage((uint16_t)(voltage / 32));
+//
+//    // autodetect cell count, going from 2S..6S
+//    for (i = 1; i < 6; i++) {
+//        if (voltage < i * mcfg.vbatmaxcellvoltage)
+//            break;
+//    }
     batteryCellCount = i;
     batteryWarningVoltage = i * mcfg.vbatmincellvoltage; // 3.3V per cell minimum, configurable in CLI
 }
@@ -268,29 +265,29 @@ void Baro_Common(void)
 
 int Baro_update(void)
 {
-    static uint32_t baroDeadline = 0;
-    static int state = 0;
-
-    if ((int32_t)(currentTime - baroDeadline) < 0)
-        return 0;
-
-    baroDeadline = currentTime;
-
-    if (state) {
-        baro.get_up();
-        baro.start_ut();
-        baroDeadline += baro.ut_delay;
-        baro.calculate(&baroPressure, &baroTemperature);
-        state = 0;
-        return 2;
-    } else {
-        baro.get_ut();
-        baro.start_up();
-        Baro_Common();
-        state = 1;
-        baroDeadline += baro.up_delay;
+//    static uint32_t baroDeadline = 0;
+//    static int state = 0;
+//
+//    if ((int32_t)(currentTime - baroDeadline) < 0)
+//        return 0;
+//
+//    baroDeadline = currentTime;
+//
+//    if (state) {
+//        baro.get_up();
+//        baro.start_ut();
+//        baroDeadline += baro.ut_delay;
+//        baro.calculate(&baroPressure, &baroTemperature);
+//        state = 0;
+//        return 2;
+//    } else {
+//        baro.get_ut();
+//        baro.start_up();
+//        Baro_Common();
+//        state = 1;
+//        baroDeadline += baro.up_delay;
         return 1;
-    }
+//    }
 }
 #endif /* BARO */
 
@@ -383,57 +380,57 @@ void Mag_init(void)
 {
     // initialize and calibration. turn on led during mag calibration (calibration routine blinks it)
     LED1_ON;
-    hmc5883lInit();
+//    hmc5883lInit();
     LED1_OFF;
     magInit = 1;
 }
 
 int Mag_getADC(void)
 {
-    static uint32_t t, tCal = 0;
-    static int16_t magZeroTempMin[3];
-    static int16_t magZeroTempMax[3];
-    uint32_t axis;
-
-    if ((int32_t)(currentTime - t) < 0)
-        return 0;                 //each read is spaced by 100ms
-    t = currentTime + 100000;
-
-    // Read mag sensor
-    hmc5883lRead(magADC);
-
-    if (f.CALIBRATE_MAG) {
-        tCal = t;
-        for (axis = 0; axis < 3; axis++) {
-            mcfg.magZero[axis] = 0;
-            magZeroTempMin[axis] = magADC[axis];
-            magZeroTempMax[axis] = magADC[axis];
-        }
-        f.CALIBRATE_MAG = 0;
-    }
-
-    if (magInit) {              // we apply offset only once mag calibration is done
-        magADC[X] -= mcfg.magZero[X];
-        magADC[Y] -= mcfg.magZero[Y];
-        magADC[Z] -= mcfg.magZero[Z];
-    }
-
-    if (tCal != 0) {
-        if ((t - tCal) < 30000000) {    // 30s: you have 30s to turn the multi in all directions
-            LED0_TOGGLE;
-            for (axis = 0; axis < 3; axis++) {
-                if (magADC[axis] < magZeroTempMin[axis])
-                    magZeroTempMin[axis] = magADC[axis];
-                if (magADC[axis] > magZeroTempMax[axis])
-                    magZeroTempMax[axis] = magADC[axis];
-            }
-        } else {
-            tCal = 0;
-            for (axis = 0; axis < 3; axis++)
-                mcfg.magZero[axis] = (magZeroTempMin[axis] + magZeroTempMax[axis]) / 2; // Calculate offsets
-            writeEEPROM(1, true);
-        }
-    }
+//    static uint32_t t, tCal = 0;
+//    static int16_t magZeroTempMin[3];
+//    static int16_t magZeroTempMax[3];
+//    uint32_t axis;
+//
+//    if ((int32_t)(currentTime - t) < 0)
+//        return 0;                 //each read is spaced by 100ms
+//    t = currentTime + 100000;
+//
+//    // Read mag sensor
+//    hmc5883lRead(magADC);
+//
+//    if (f.CALIBRATE_MAG) {
+//        tCal = t;
+//        for (axis = 0; axis < 3; axis++) {
+//            mcfg.magZero[axis] = 0;
+//            magZeroTempMin[axis] = magADC[axis];
+//            magZeroTempMax[axis] = magADC[axis];
+//        }
+//        f.CALIBRATE_MAG = 0;
+//    }
+//
+//    if (magInit) {              // we apply offset only once mag calibration is done
+//        magADC[X] -= mcfg.magZero[X];
+//        magADC[Y] -= mcfg.magZero[Y];
+//        magADC[Z] -= mcfg.magZero[Z];
+//    }
+//
+//    if (tCal != 0) {
+//        if ((t - tCal) < 30000000) {    // 30s: you have 30s to turn the multi in all directions
+//            LED0_TOGGLE;
+//            for (axis = 0; axis < 3; axis++) {
+//                if (magADC[axis] < magZeroTempMin[axis])
+//                    magZeroTempMin[axis] = magADC[axis];
+//                if (magADC[axis] > magZeroTempMax[axis])
+//                    magZeroTempMax[axis] = magADC[axis];
+//            }
+//        } else {
+//            tCal = 0;
+//            for (axis = 0; axis < 3; axis++)
+//                mcfg.magZero[axis] = (magZeroTempMin[axis] + magZeroTempMax[axis]) / 2; // Calculate offsets
+//            writeEEPROM(1, true);
+//        }
+//    }
 
     return 1;
 }
@@ -443,14 +440,14 @@ int Mag_getADC(void)
 
 void Sonar_init(void)
 {
-    hcsr04_init(sonar_rc78);
-    sensorsSet(SENSOR_SONAR);
+//    hcsr04_init(sonar_rc78);
+//    sensorsSet(SENSOR_SONAR);
     sonarAlt = 0;
 }
 
 void Sonar_update(void)
 {
-    hcsr04_get_distance(&sonarAlt);
+//    hcsr04_get_distance(&sonarAlt);
 }
 
 #endif

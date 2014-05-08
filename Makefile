@@ -52,13 +52,7 @@ COMMON_SRC	 = startup_stm32f10x_md_gcc.S \
 		   mw.c \
 		   sensors.c \
 		   serial.c \
-		   sbus.c \
-		   sumd.c \
-		   spektrum.c \
 		   rxmsp.c \
-		   telemetry_common.c \
-		   telemetry_frsky.c \
-		   telemetry_hott.c \
 		   drv_gpio.c \
 		   drv_i2c.c \
 		   drv_i2c_soft.c \
@@ -72,21 +66,7 @@ COMMON_SRC	 = startup_stm32f10x_md_gcc.S \
 		   $(STDPERIPH_SRC)
 
 # Source files for the NAZE target
-NAZE_SRC	 = drv_adc.c \
-		   drv_adxl345.c \
-		   drv_bma280.c \
-		   drv_bmp085.c \
-		   drv_ms5611.c \
-		   drv_hcsr04.c \
-		   drv_hmc5883l.c \
-		   drv_ledring.c \
-		   drv_mma845x.c \
-		   drv_mpu3050.c \
-		   drv_mpu6050.c \
-		   drv_l3g4200d.c \
-		   drv_pwm.c \
-		   drv_spi.c \
-		   drv_timer.c \
+NAZE_SRC	 = drv_timer.c \
 		   $(COMMON_SRC)
 
 # Source files for the FY90Q target

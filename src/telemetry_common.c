@@ -88,24 +88,24 @@ bool shouldChangeTelemetryStateNow(bool newState)
 
 static void configureTelemetryPort(void)
 {
-    if (isTelemetryProviderFrSky()) {
-        configureFrSkyTelemetryPort();
-    }
-
-    if (isTelemetryProviderHoTT()) {
-        configureHoTTTelemetryPort();
-    }
+//    if (isTelemetryProviderFrSky()) {
+//        configureFrSkyTelemetryPort();
+//    }
+//
+//    if (isTelemetryProviderHoTT()) {
+//        configureHoTTTelemetryPort();
+//    }
 }
 
 void freeTelemetryPort(void)
 {
-    if (isTelemetryProviderFrSky()) {
-        freeFrSkyTelemetryPort();
-    }
-
-    if (isTelemetryProviderHoTT()) {
-        freeHoTTTelemetryPort();
-    }
+//    if (isTelemetryProviderFrSky()) {
+//        freeFrSkyTelemetryPort();
+//    }
+//
+//    if (isTelemetryProviderHoTT()) {
+//        freeHoTTTelemetryPort();
+//    }
 }
 
 void checkTelemetryState(void)
@@ -133,11 +133,11 @@ void handleTelemetry(void)
     if (!isTelemetryConfigurationValid || !determineNewTelemetryEnabledState())
         return;
 
-    if (isTelemetryProviderFrSky()) {
-        handleFrSkyTelemetry();
-    }
-
-    if (isTelemetryProviderHoTT()) {
-        handleHoTTTelemetry();
-    }
+//    if (isTelemetryProviderFrSky()) {
+//        handleFrSkyTelemetry();
+//    }
+//
+//    if (isTelemetryProviderHoTT()) {
+//        handleHoTTTelemetry();
+//    }
 }
