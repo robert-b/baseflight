@@ -160,14 +160,14 @@ uint8_t read8(void)
 uint16_t read16(void)
 {
     uint16_t t = read8();
-    t += (uint16_t) read8() << 8;
+    t += (uint16_t)read8() << 8;
     return t;
 }
 
 uint32_t read32(void)
 {
     uint32_t t = read16();
-    t += (uint32_t) read16() << 16;
+    t += (uint32_t)read16() << 16;
     return t;
 }
 
@@ -238,8 +238,14 @@ reset:
 void serialInit(uint32_t baudrate)
 {
     int idx;
+    USART_TypeDef* serial = USART1;
 
-    core.mainport = uartOpen(USART1, NULL, baudrate, MODE_RXTX);
+    // Open msp UART
+    if (mcfg.msp_port == SERIALPORT_UART_2 && !feature(FEATURE_SERIALRX)) {
+        serial = USART2;
+    }
+    core.mainport = uartOpen(serial, NULL, baudrate, MODE_RXTX);
+    serialPortMap[mcfg.msp_port] = serialPortMap[mcfg.msp_port] + 1;
 
     // calculate used boxes based on features and fill availableBoxes[] array
     memset(availableBoxes, 0xFF, sizeof(availableBoxes));
