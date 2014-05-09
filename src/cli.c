@@ -996,8 +996,8 @@ static void cliStatus(char *cmdline)
             printf(".%c", core.mpu6050_scale ? 'o' : 'n');
     }
     cliPrint("\r\n");
-
-    printf("Cycle Time: %d, I2C Errors: %d, config size: %d\r\n", cycleTime, i2cGetErrorCounter(), sizeof(master_t));
+    printf("Cycle Time: %d, config size: %d\r\n", cycleTime, sizeof(master_t));
+   // printf("Cycle Time: %d, I2C Errors: %d, config size: %d\r\n", cycleTime, i2cGetErrorCounter(), sizeof(master_t));
 }
 
 static void cliVersion(char *cmdline)
